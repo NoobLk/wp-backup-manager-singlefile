@@ -2980,13 +2980,63 @@ $existingBackups = getExistingBackups();
         .footer a:hover {
             text-decoration: underline;
         }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-toggle {
+            background: #e2e8f0;
+            color: #0f172a;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.12s ease, box-shadow 0.12s ease;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+        }
+
+        .theme-toggle:hover { transform: translateY(-1px); }
+
+        /* Dark theme overrides */
+        body.theme-dark { background: #0b1220; color: #e2e8f0; }
+        body.theme-dark .topbar { background: #0b1220; color: #e2e8f0; box-shadow: 0 12px 24px rgba(0,0,0,0.4); }
+        body.theme-dark .card { background: #0f172a; border-color: rgba(255,255,255,0.06); box-shadow: 0 20px 40px rgba(0,0,0,0.35); }
+        body.theme-dark .section-title { color: #e2e8f0; }
+        body.theme-dark .info-chip { background: #111827; border-color: rgba(59,130,246,0.25); }
+        body.theme-dark .info-label { color: #60a5fa; }
+        body.theme-dark .info-value { color: #e2e8f0; }
+        body.theme-dark .input-card { background: #111827; border-color: rgba(255,255,255,0.06); }
+        body.theme-dark .option-title { color: #e2e8f0; }
+        body.theme-dark .option-help { color: #cbd5e1; }
+        body.theme-dark .text-input { background: #0b1220; color: #e2e8f0; border-color: rgba(255,255,255,0.15); }
+        body.theme-dark .text-input:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96,165,250,0.25); }
+        body.theme-dark .backup-btn { box-shadow: 0 14px 30px rgba(37, 99, 235, 0.3); }
+        body.theme-dark .progress-bar-wrapper { background: #1e293b; }
+        body.theme-dark .progress-text { color: #cbd5e1; }
+        body.theme-dark .status-message.success { background: #052e16; color: #bbf7d0; border-color: #14532d; }
+        body.theme-dark .status-message.error { background: #3f0f1f; color: #fecdd3; border-color: #fca5a5; }
+        body.theme-dark .logs-box { background: #0b1220; color: #e2e8f0; }
+        body.theme-dark .backup-item { background: #111827; border-color: rgba(255,255,255,0.06); }
+        body.theme-dark .backup-name { color: #e2e8f0; }
+        body.theme-dark .backup-meta { color: #cbd5e1; }
+        body.theme-dark .btn-download { box-shadow: 0 10px 20px rgba(22,163,74,0.28); }
+        body.theme-dark .btn-delete { box-shadow: 0 10px 20px rgba(185,28,28,0.28); }
+        body.theme-dark .footer { color: #cbd5e1; }
+        body.theme-dark .footer a { color: #93c5fd; }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="topbar">
             <h1>WordPress Backup Manager</h1>
-            <a href="?logout=1" class="logout-btn">Logout</a>
+            <div class="topbar-actions">
+                <button id="themeToggle" class="theme-toggle" type="button">Dark mode</button>
+                <a href="?logout=1" class="logout-btn">Logout</a>
+            </div>
         </header>
 
         <div class="card">
@@ -3074,11 +3124,38 @@ $existingBackups = getExistingBackups();
             <?php endif; ?>
         </div>
 
-        <div class="footer">
-            Developed and maintained by <a href="https://github.com/nooblk-98" target="_blank" rel="noopener noreferrer">Nooblk</a> with love &lt;3
-        </div>
+    <div class="footer">
+        Developed and maintained by <a href="https://github.com/nooblk-98" target="_blank" rel="noopener noreferrer">Nooblk</a> with love &lt;3
     </div>
-    <script>
+</div>
+<script>
+    (function initThemeToggle() {
+        const btn = document.getElementById('themeToggle');
+        if (!btn) return;
+
+        const applyTheme = (mode) => {
+            const isDark = mode === 'dark';
+            document.body.classList.toggle('theme-dark', isDark);
+            localStorage.setItem('backupTheme', isDark ? 'dark' : 'light');
+            btn.textContent = isDark ? 'Light mode' : 'Dark mode';
+        };
+
+        const saved = localStorage.getItem('backupTheme') === 'dark' ? 'dark' : 'light';
+        applyTheme(saved);
+
+        btn.addEventListener('click', () => {
+            const next = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
+            applyTheme(next);
+        });
+    })();
+
+    (function presetTheme() {
+        const saved = localStorage.getItem('backupTheme');
+        if (saved === 'dark') {
+            document.body.classList.add('theme-dark');
+        }
+        })();
+
         let currentBackupFile = '';
         const csrfToken = <?php echo json_encode($csrfToken); ?>;
         const defaultIgnoreDirs = <?php echo json_encode(implode(', ', parseIgnoreDirNames(BACKUP_IGNORE_DIRNAMES))); ?>;
